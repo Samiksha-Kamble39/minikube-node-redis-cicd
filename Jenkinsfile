@@ -25,9 +25,15 @@ pipeline {
         stage('Deploy To Kubernetes') {
             steps {
 
-                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+                withCredentials([string(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_CONTENT')]) {
 
-                    sh 'kubectl apply -f k8s/'
+                    sh '''
+                    echo "$KUBECONFIG_CONTENT" > kubeconfig.yaml
+
+                    export KUBECONFIG=$(pwd)/kubeconfig.yaml
+
+                    kubectl apply -f k8s/
+                    '''
                 }
             }
         }
@@ -35,10 +41,17 @@ pipeline {
         stage('Verify Deployment') {
             steps {
 
-                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+                withCredentials([string(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_CONTENT')]) {
 
-                    sh 'kubectl get pods'
-                    sh 'kubectl get svc'
+                    sh '''
+                    echo "$KUBECONFIG_CONTENT" > kubeconfig.yaml
+
+                    export KUBECONFIG=$(pwd)/kubeconfig.yaml
+
+                    kubectl get pods
+
+                    kubectl get svc
+                    '''
                 }
             }
         }
