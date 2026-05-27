@@ -28,12 +28,14 @@ pipeline {
                 withCredentials([string(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_CONTENT')]) {
 
                     sh '''
-                    echo "$KUBECONFIG_CONTENT" > kubeconfig.yaml
+cat > kubeconfig.yaml <<EOF
+$KUBECONFIG_CONTENT
+EOF
 
-                    export KUBECONFIG=$(pwd)/kubeconfig.yaml
+export KUBECONFIG=$(pwd)/kubeconfig.yaml
 
-                    kubectl apply -f k8s/
-                    '''
+kubectl apply -f k8s/
+'''
                 }
             }
         }
@@ -44,14 +46,16 @@ pipeline {
                 withCredentials([string(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_CONTENT')]) {
 
                     sh '''
-                    echo "$KUBECONFIG_CONTENT" > kubeconfig.yaml
+cat > kubeconfig.yaml <<EOF
+$KUBECONFIG_CONTENT
+EOF
 
-                    export KUBECONFIG=$(pwd)/kubeconfig.yaml
+export KUBECONFIG=$(pwd)/kubeconfig.yaml
 
-                    kubectl get pods
+kubectl get pods
 
-                    kubectl get svc
-                    '''
+kubectl get svc
+'''
                 }
             }
         }
