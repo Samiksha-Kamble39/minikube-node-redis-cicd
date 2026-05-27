@@ -9,7 +9,6 @@ pipeline {
 
         stage('Clone Repository') {
             steps {
-
                 git branch: 'main',
                 url: 'https://github.com/samiksha-kamble39/minikube-node-redis-cicd.git'
             }
@@ -17,7 +16,6 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-
                 sh 'docker build -t $IMAGE_NAME .'
             }
         }
@@ -25,14 +23,10 @@ pipeline {
         stage('Deploy To Kubernetes') {
             steps {
 
-                withCredentials([string(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_CONTENT')]) {
+                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
 
                     sh '''
-cat > kubeconfig.yaml <<EOF
-$KUBECONFIG_CONTENT
-EOF
-
-export KUBECONFIG=$(pwd)/kubeconfig.yaml
+echo "Deploying to Kubernetes"
 
 kubectl apply -f k8s/
 '''
@@ -43,15 +37,9 @@ kubectl apply -f k8s/
         stage('Verify Deployment') {
             steps {
 
-                withCredentials([string(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_CONTENT')]) {
+                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
 
                     sh '''
-cat > kubeconfig.yaml <<EOF
-$KUBECONFIG_CONTENT
-EOF
-
-export KUBECONFIG=$(pwd)/kubeconfig.yaml
-
 kubectl get pods
 
 kubectl get svc
