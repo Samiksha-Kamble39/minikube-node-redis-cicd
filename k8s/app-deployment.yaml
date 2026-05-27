@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-app
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: node-app
+
+  template:
+    metadata:
+      labels:
+        app: node-app
+
+    spec:
+      containers:
+      - name: node-app
+
+        image: node-app:v1
+
+        imagePullPolicy: Never
+
+        env:
+        - name: REDIS_HOST
+          value: redis
+
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: password
+
+        ports:
+        - containerPort: 3000
+
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+
+          initialDelaySeconds: 10
+          periodSeconds: 10
